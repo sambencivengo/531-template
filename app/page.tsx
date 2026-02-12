@@ -8,6 +8,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Label} from "@/components/ui/label";
 import {Switch} from "@/components/ui/switch";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {OneRepMaxEstimator} from "./components/OneRepMaxEstimator";
 import {Program} from "./components/Program";
 import {TrainingMaxInput} from "./components/TrainingMaxInput";
 
@@ -132,6 +133,7 @@ function HomeContent() {
           <CardDescription>Enter 1RM or training max (90% of 1RM). Editing either updates the other; both are saved to the link.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <OneRepMaxEstimator onApplyToLift={(lift, value) => setTrainingMaxes((prev) => ({...prev, [lift]: value}))} />
           {LIFTS.map((lift) => (
             <TrainingMaxInput key={lift} lift={lift} oneRepMax={trainingMaxes[lift] ?? 0} onOneRepMaxChange={(value) => setTrainingMaxes((prev) => ({...prev, [lift]: value}))} />
           ))}
