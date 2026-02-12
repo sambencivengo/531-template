@@ -101,6 +101,9 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
                 ))}
               </TableBody>
             </Table>
+            <p className="mt-3 text-center text-xs text-muted-foreground">
+              Assistance: 25–50 reps for push, pull, and single leg/core.
+            </p>
           </div>
         )}
       </div>
