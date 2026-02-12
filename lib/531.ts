@@ -48,7 +48,7 @@ export function getTrainingMax(oneRepMax: number): number {
   return Math.round(oneRepMax * 0.9);
 }
 
-export function roundToNearest(value: number, increment = 2.5): number {
+export function roundToNearest(value: number, increment = 5): number {
   return Math.round(value / increment) * increment;
 }
 
