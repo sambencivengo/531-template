@@ -1,21 +1,15 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { BBB_PERCENTAGE_OPTIONS } from "@/lib/531";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Program } from "./components/Program";
-import { TrainingMaxInput } from "./components/TrainingMaxInput";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import {usePathname, useRouter, useSearchParams} from "next/navigation";
+import {BBB_PERCENTAGE_OPTIONS} from "@/lib/531";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
+import {Label} from "@/components/ui/label";
+import {Switch} from "@/components/ui/switch";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Program} from "./components/Program";
+import {TrainingMaxInput} from "./components/TrainingMaxInput";
 
 const LIFTS = ["Overhead Press", "Squat", "Bench Press", "Deadlift"] as const;
 
@@ -49,12 +43,7 @@ function parseBBBPercentage(searchParams: URLSearchParams): number {
   return num >= 30 && num <= 80 && num % 5 === 0 ? num : 50;
 }
 
-function buildSearchParams(
-  trainingMaxes: Record<string, number>,
-  lessBoring: boolean,
-  week: number,
-  bbbPercentage: number
-): URLSearchParams {
+function buildSearchParams(trainingMaxes: Record<string, number>, lessBoring: boolean, week: number, bbbPercentage: number): URLSearchParams {
   const params = new URLSearchParams();
   for (const lift of LIFTS) {
     const value = trainingMaxes[lift] ?? 0;
@@ -93,42 +82,70 @@ function HomeContent() {
     setLessBoring(searchParams.get("less-boring") === "1");
   }, [searchParams]);
 
+  const canSave = LIFTS.every((lift) => (trainingMaxes[lift] ?? 0) > 0);
+  const [copied, setCopied] = useState(false);
+  const [showProgram, setShowProgram] = useState(false);
+
+  const hasParamsOnLoad = useMemo(
+    () => LIFTS.every((lift) => (parseTrainingMaxes(searchParams)[lift] ?? 0) > 0),
+    [searchParams]
+  );
+  useEffect(() => {
+    if (hasParamsOnLoad) setShowProgram(true);
+  }, [hasParamsOnLoad]);
+
   const handleSubmit = () => {
     const params = buildSearchParams(trainingMaxes, lessBoring, week, bbbPercentage);
     const query = params.toString();
     const url = query ? `${pathname}?${query}` : pathname;
     router.replace(url, { scroll: false });
+    setShowProgram(true);
+  };
+
+  const getShareUrl = useCallback(() => {
+    const params = buildSearchParams(trainingMaxes, lessBoring, week, bbbPercentage);
+    const query = params.toString();
+    const path = query ? `${pathname}?${query}` : pathname;
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}${path}`;
+    }
+    return path;
+  }, [pathname, trainingMaxes, lessBoring, week, bbbPercentage]);
+
+  const handleCopyLink = async () => {
+    const url = getShareUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback for older browsers
+      setCopied(false);
+    }
   };
 
   return (
     <div className="flex min-h-dvh w-full flex-col items-center bg-zinc-50 px-4 py-6 dark:bg-zinc-950 sm:px-6 sm:py-8">
-      <Card className="w-full max-w-md flex-1 sm:flex-none">
+      <Card className="w-full max-w-lg flex-1 sm:flex-none">
         <CardHeader>
           <CardTitle className="text-2xl">5/3/1 BBB</CardTitle>
           <CardDescription>Enter 1RM or training max (90% of 1RM). Editing either updates the other; both are saved to the link.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {LIFTS.map((lift) => (
-            <TrainingMaxInput key={lift} lift={lift} oneRepMax={trainingMaxes[lift] ?? 0} onOneRepMaxChange={(value) => setTrainingMaxes((prev) => ({ ...prev, [lift]: value }))} />
+            <TrainingMaxInput key={lift} lift={lift} oneRepMax={trainingMaxes[lift] ?? 0} onOneRepMaxChange={(value) => setTrainingMaxes((prev) => ({...prev, [lift]: value}))} />
           ))}
           <div className="flex items-center justify-between gap-2 pt-2">
             <Label htmlFor="less-boring" className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Less boring
             </Label>
-            <Switch
-              id="less-boring"
-              checked={lessBoring}
-              onCheckedChange={(checked) => setLessBoring(checked === true)}
-            />
+            <Switch id="less-boring" checked={lessBoring} onCheckedChange={(checked) => setLessBoring(checked === true)} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="bbb" className="text-sm text-muted-foreground">
               BBB % (aim for 50% - 70%)
             </Label>
-            <Select
-              value={String(bbbPercentage)}
-              onValueChange={(v) => setBBBPercentage(Number(v))}
-            >
+            <Select value={String(bbbPercentage)} onValueChange={(v) => setBBBPercentage(Number(v))}>
               <SelectTrigger id="bbb" className="w-full">
                 <SelectValue placeholder="BBB %" />
               </SelectTrigger>
@@ -141,19 +158,26 @@ function HomeContent() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSubmit} className="w-full">
-            Save to link
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSubmit} className="flex-1" disabled={!canSave}>
+              Generate Program
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCopyLink}
+              disabled={!canSave}
+              className="shrink-0"
+            >
+              {copied ? "Copied!" : "Copy link"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      <Program
-        week={week}
-        onWeekChange={setWeek}
-        oneRepMaxes={trainingMaxes}
-        lessBoring={lessBoring}
-        bbbPercentage={bbbPercentage}
-      />
+      {showProgram && (
+        <Program week={week} onWeekChange={setWeek} oneRepMaxes={trainingMaxes} lessBoring={lessBoring} bbbPercentage={bbbPercentage} />
+      )}
     </div>
   );
 }

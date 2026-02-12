@@ -34,6 +34,7 @@ export function TrainingMaxInput({
     <div className="rounded-md border border-border bg-card/40 px-3 py-3">
       <Label className="mb-3 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         {lift}
+        <span className="text-destructive"> *</span>
       </Label>
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1.5">

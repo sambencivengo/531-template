@@ -1,23 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import {
-  calculateWeight,
-  DAY_MAIN_LIFT,
-  getBBBLift,
-  WEEK_PERCENTAGES,
-} from "@/lib/531";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {useState} from "react";
+import {calculateWeight, DAY_MAIN_LIFT, getBBBLift, WEEK_PERCENTAGES} from "@/lib/531";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
 interface ProgramProps {
   week: number;
@@ -34,8 +22,7 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
 
   const bbbLift = getBBBLift(mainLift, lessBoring);
   const bbbOneRepMax = oneRepMaxes[bbbLift] ?? 0;
-  const bbbWeight =
-    bbbOneRepMax > 0 ? calculateWeight(bbbOneRepMax, bbbPercentage) : 0;
+  const bbbWeight = bbbOneRepMax > 0 ? calculateWeight(bbbOneRepMax, bbbPercentage) : 0;
 
   const [bbbChecked, setBBBChecked] = useState<boolean[]>([false, false, false, false, false]);
 
@@ -48,7 +35,7 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
   };
 
   if (oneRepMax <= 0) {
-    return <p className="text-center text-sm text-muted-foreground">Enter your {mainLift} 1RM above to see your main lift sets.</p>;
+    return <p className="text-center text-sm text-muted-foreground">Enter your {mainLift} 1RM or Training Max above to see your main lift sets.</p>;
   }
 
   return (
@@ -70,9 +57,7 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
                 return (
                   <TableRow key={i}>
                     <TableCell className="w-1/3 text-center font-mono">
-                      <span className="inline-block min-w-[5ch] text-left">
-                        {weight} lbs
-                      </span>
+                      <span className="inline-block min-w-[5ch] text-left">{weight} lbs</span>
                     </TableCell>
                     <TableCell className="w-1/3 text-center font-mono">
                       <span className="inline-block min-w-[3ch] text-left">
@@ -81,9 +66,7 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
                       </span>
                     </TableCell>
                     <TableCell className="w-1/3 text-center font-mono">
-                      <span className="inline-block min-w-[4ch] text-left">
-                        {set.percent}%
-                      </span>
+                      <span className="inline-block min-w-[4ch] text-left">{set.percent}%</span>
                     </TableCell>
                   </TableRow>
                 );
@@ -93,9 +76,7 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
         </div>
         {bbbOneRepMax > 0 && (
           <div className="rounded-md border border-border bg-muted/30 px-4 py-3">
-            <h4 className="mb-3 text-center text-sm font-medium">
-              BBB: {bbbLift}
-            </h4>
+            <h4 className="mb-3 text-center text-sm font-medium">BBB: {bbbLift}</h4>
             <Table className="table-fixed text-center">
               <TableHeader>
                 <TableRow>
@@ -108,19 +89,12 @@ function DayContent({day, week, oneRepMaxes, lessBoring, bbbPercentage}: {day: n
               <TableBody>
                 {[1, 2, 3, 4, 5].map((setNum, i) => (
                   <TableRow key={setNum}>
-                    <TableCell className="font-mono text-center">
-                      {bbbWeight} lbs
-                    </TableCell>
+                    <TableCell className="font-mono text-center">{bbbWeight} lbs</TableCell>
                     <TableCell className="font-mono text-center">10</TableCell>
-                    <TableCell className="font-mono text-center">
-                      {bbbPercentage}%
-                    </TableCell>
+                    <TableCell className="font-mono text-center">{bbbPercentage}%</TableCell>
                     <TableCell className="w-12">
                       <div className="flex justify-center">
-                        <Checkbox
-                          checked={bbbChecked[i]}
-                          onCheckedChange={() => toggleBBBCheck(i)}
-                        />
+                        <Checkbox checked={bbbChecked[i]} onCheckedChange={() => toggleBBBCheck(i)} />
                       </div>
                     </TableCell>
                   </TableRow>
