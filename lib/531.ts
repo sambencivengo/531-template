@@ -49,7 +49,7 @@ export function getTrainingMax(oneRepMax: number): number {
 }
 
 export function roundToNearest(value: number, increment = 5): number {
-  return Math.round(value / increment) * increment;
+  return Math.ceil(value / increment) * increment;
 }
 
 export function calculateWeight(
